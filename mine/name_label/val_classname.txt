@@ -1,0 +1,16 @@
+n01855672 goose
+n02114548 tundrarum
+n03770439 mini
+n02091244 Podenco
+n03417042 dustcart
+n02981792 catamaran
+n03075370 lock
+n03980874 poncho
+n03535780 bar
+n03584254 iPod
+n02138441 mierkat
+n02971356 carton
+n09256479 reef
+n02950826 cannon
+n02174001 beetle
+n03773504 missile
