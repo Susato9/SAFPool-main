@@ -1,0 +1,1 @@
+sudo scp -r amax@121.48.161.190:/amax/2020/ZC/Incresement_learning/data/imagenet.zip /media/meng1/disk1/YCJ/data

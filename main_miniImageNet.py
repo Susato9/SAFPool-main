@@ -185,9 +185,9 @@ def main():
     datasets = MiniImageNet(cfg['root_path'], cfg['shots'], preprocess)
 
 
-    test_loader = torch.utils.data.DataLoader(datasets.test1, batch_size=256, num_workers=8, shuffle=False)
-    train_loader_cache = torch.utils.data.DataLoader(datasets.train, batch_size=256, num_workers=8, shuffle=False)
-    train_loader_F = torch.utils.data.DataLoader(datasets.train, batch_size=256, num_workers=8, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(datasets.test1, batch_size=64, num_workers=8, shuffle=False)
+    train_loader_cache = torch.utils.data.DataLoader(datasets.train, batch_size=256, num_workers=8, shuffle=False,drop_last=False)
+    train_loader_F = torch.utils.data.DataLoader(datasets.train, batch_size=64, num_workers=8, shuffle=True, drop_last=False)
 
     # Textual features
     print("Getting textual features as CLIP's classifier.")
