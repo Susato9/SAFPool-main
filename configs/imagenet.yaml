@@ -1,5 +1,5 @@
 # ------ root_path/dataset_name ------
-root_path: 'DATA/imagenet/mini_ImageNet_new_originize'
+root_path: '/media/meng1/disk1/YCJ/data/imagenet1k'
 
 
 # ------ Load Cache and Features ------
@@ -23,9 +23,9 @@ init_alpha: 1.17
 
 # ------ Basic Config ------
 dataset: 'imagenet'
-shots: 16
-backbone: 'RN50'
+shots: 1
+backbone: 'ViT-B/32'
 
-lr: 0.001
+lr: 0.0001
 augment_epoch: 10
 train_epoch: 20

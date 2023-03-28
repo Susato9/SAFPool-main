@@ -5,7 +5,8 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 import clip
-
+import time
+import os
 
 def cls_acc(output, target, topk=1):
     pred = output.topk(topk, 1, True, True)[1].t()
@@ -109,7 +110,7 @@ def pre_load_features(cfg, split, clip_model, loader):
 
 
 def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, adapter=None):#寻找最佳的超参数
-
+    year,month,day,hour,minute,second= time.localtime(time.time())[:6]
     if cfg['search_hp'] == True:
     
         beta_list = [i * (cfg['search_scale'][0] - 0.1) / cfg['search_step'][0] + 0.1 for i in range(cfg['search_step'][0])]
@@ -117,7 +118,7 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, ada
 
         best_acc = 0
         best_beta, best_alpha = 0, 0
-
+        write_str=""
         for beta in beta_list:
             for alpha in alpha_list:
                 if adapter:
@@ -136,7 +137,10 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, ada
                     best_acc = acc
                     best_beta = beta
                     best_alpha = alpha
+                    write_str+=str(alpha)+" "+str(beta)+" "+str(acc)+"\n"
 
         print("\nAfter searching, the best accuarcy: {:.2f}.\n".format(best_acc))
-
+        save_name=str(cfg['backbone']) + "_"+str(cfg['shots'])+"shots_"+str(year)+"_"+str(month)+"_"+str(day)+"_"+str(hour)+"_"+str(minute)+"_"+str(second)+".txt"
+        with open(os.path.join("experiment/search_a_b_acc",save_name), 'w') as f:
+            f.write(write_str)
     return best_beta, best_alpha

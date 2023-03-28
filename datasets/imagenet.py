@@ -6,6 +6,8 @@ from collections import defaultdict
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from torchvision.datasets import ImageFolder
+
 
 
 imagenet_classes = ["tench", "goldfish", "great white shark", "tiger shark", "hammerhead shark", "electric ray",
@@ -189,8 +191,8 @@ class ImageNet():
 
     def __init__(self, root, num_shots, preprocess):
 
-        self.dataset_dir = os.path.join(root, self.dataset_dir)
-        self.image_dir = os.path.join(self.dataset_dir, 'images')
+        self.dataset_dir = os.path.join(root)
+        
 
         train_preprocess = transforms.Compose([
                                                 transforms.RandomResizedCrop(size=224, scale=(0.5, 1), interpolation=transforms.InterpolationMode.BICUBIC),
@@ -200,10 +202,11 @@ class ImageNet():
                                             ])
         test_preprocess = preprocess
 
+        train_root=self.dataset_dir+'/train'
+        val_root=self.dataset_dir+'/val'
         
-        self.train=torchvision.datasets.Imagenet(self.image_dir,train=True,transform=train_preprocess,download=True)
-        self.val=torchvision.datasets.Imagenet(self.image_dir,train=False,transform=test_preprocess,download=True)
-        self.test=torchvision.datasets.Imagenet(self.image_dir,train=False,transform=test_preprocess,download=True)
+        self.train=ImageFolder(train_root, transform=train_preprocess)
+        self.test=ImageFolder(val_root, transform=test_preprocess)
         
         self.template = imagenet_templates
         self.classnames = imagenet_classes
@@ -220,4 +223,15 @@ class ImageNet():
         self.train.imgs = imgs
         self.train.targets = targets
         self.train.samples = imgs
+
+
+if __name__ == '__main__':
+    preprocess=transforms.Compose([
+                                                transforms.RandomResizedCrop(size=224, scale=(0.5, 1), interpolation=transforms.InterpolationMode.BICUBIC),
+                                                transforms.RandomHorizontalFlip(p=0.5),
+                                                transforms.ToTensor(),
+                                                transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
+                                            ])
+    DATA=ImageNet(root='/media/meng1/disk1/YCJ/data/imagenet1k', num_shots=1, preprocess=preprocess)
+    print(DATA.train[0][0].shape)
         
