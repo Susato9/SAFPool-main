@@ -58,7 +58,7 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, test_features, test_labels,
     adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(clip_model.dtype).cuda()
     adapter.weight = nn.Parameter(cache_keys.t())
     
-    optimizer = torch.optim.AdamW(adapter.parameters(), lr=cfg['lr'], eps=1e-4)
+    optimizer = torch.optim.AdamW(adapter.parameters(), lr=cfg['lr'], eps=1e-3)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, cfg['train_epoch'] * len(train_loader_F))
     
     beta, alpha = cfg['init_beta'], cfg['init_alpha']
@@ -81,9 +81,9 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, test_features, test_labels,
 
             affinity = adapter(image_features)
             cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-            # clip_logits = 100. * image_features @ clip_weights
-            # tip_logits = clip_logits + cache_logits * alpha
-            tip_logits=cache_logits
+            clip_logits = 100. * image_features @ clip_weights
+            tip_logits = clip_logits + cache_logits * alpha
+            # tip_logits=cache_logits
 
             loss = F.cross_entropy(tip_logits, target)
 
@@ -103,8 +103,8 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, test_features, test_labels,
             f.write(str(current_lr)+"\n")
         # Eval
         adapter.eval()
-
-        affinity = adapter(test_features)
+        with torch.no_grad():
+            affinity = adapter(test_features)
         cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
         clip_logits = 100. * test_features @ clip_weights
         tip_logits = clip_logits + cache_logits * alpha
@@ -123,7 +123,7 @@ def run_tip_adapter_F(cfg, cache_keys, cache_values, test_features, test_labels,
     print(f"**** After fine-tuning, Tip-Adapter-F's best test accuracy: {best_acc:.2f}, at epoch: {best_epoch}. ****\n")
 
     # Search Hyperparameters
-    # _ = search_hp(cfg, affinity, cache_values, test_features, test_labels, clip_weights, adapter=adapter)
+    _ = search_hp(cfg, affinity, cache_values, test_features, test_labels, clip_weights, adapter=adapter)
 
 
 def main():
@@ -152,10 +152,10 @@ def main():
     print("Preparing ImageNet dataset.")
     imagenet = ImageNet(cfg['root_path'], cfg['shots'], preprocess)
 
-    test_loader = torch.utils.data.DataLoader(imagenet.test, batch_size=48, num_workers=8, shuffle=False)
+    test_loader = torch.utils.data.DataLoader(imagenet.test, batch_size=32, num_workers=8, shuffle=False)
 
-    train_loader_cache = torch.utils.data.DataLoader(imagenet.train, batch_size=48, num_workers=8, shuffle=False,drop_last=False)
-    train_loader_F = torch.utils.data.DataLoader(imagenet.train, batch_size=48, num_workers=8, shuffle=True,drop_last=False)
+    train_loader_cache = torch.utils.data.DataLoader(imagenet.train, batch_size=32, num_workers=8, shuffle=False,drop_last=False)
+    train_loader_F = torch.utils.data.DataLoader(imagenet.train, batch_size=32, num_workers=8, shuffle=True,drop_last=False)
 
     # Textual features
     print("Getting textual features as CLIP's classifier.")

@@ -122,7 +122,9 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, ada
         for beta in beta_list:
             for alpha in alpha_list:
                 if adapter:
-                    affinity = adapter(features)
+                    adapter.eval()
+                    with torch.no_grad():
+                        affinity = adapter(features)
                 else:
                     affinity = features @ cache_keys
 
@@ -140,7 +142,7 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, ada
                     write_str+=str(alpha)+" "+str(beta)+" "+str(acc)+"\n"
 
         print("\nAfter searching, the best accuarcy: {:.2f}.\n".format(best_acc))
-        save_name=str(cfg['backbone']) + "_"+str(cfg['shots'])+"shots_"+str(year)+"_"+str(month)+"_"+str(day)+"_"+str(hour)+"_"+str(minute)+"_"+str(second)+".txt"
+        save_name="VIT-B-32"+ "_"+str(cfg['shots'])+"shots_"+str(year)+"_"+str(month)+"_"+str(day)+"_"+str(hour)+"_"+str(minute)+"_"+str(second)+".txt"
         with open(os.path.join("experiment/search_a_b_acc",save_name), 'w') as f:
             f.write(write_str)
     return best_beta, best_alpha
